@@ -1,8 +1,8 @@
 <script>
-    export let title = "Lane";
+    export let lane;
   </script>
   
-  <div class="bg-gray-200 p-3 rounded-lg">
-    <h2 class="text-center font-semibold">{title}</h2>
+  <div class="rounded-lg p-3 {lane.color} min-h-[400px]">
+    <h2 class="text-lg font-semibold text-center mb-2">{lane.title}</h2>
   </div>
   
