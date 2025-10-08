@@ -1,5 +1,6 @@
 <script>
     import Lane from "./Lane.svelte";
+    import { onMount } from "svelte";
   
     let lanes = [
       { title: "Backlog", color: "bg-red-200", tasks: [
@@ -11,6 +12,29 @@
       { title: "Done", color: "bg-blue-200", tasks: [] }
     ];
   
+    // Nur im Browser verfügbar
+    let isBrowser = false;
+  
+    // Daten beim Start laden
+    onMount(() => {
+      isBrowser = true;
+      const saved = localStorage.getItem("kanbanData");
+      if (saved) {
+        try {
+          lanes = JSON.parse(saved);
+        } catch {
+          console.warn("Error while loading data");
+        }
+      }
+    });
+  
+    // Speichern im localStorage
+    function save() {
+      if (isBrowser) {
+        localStorage.setItem("kanbanData", JSON.stringify(lanes));
+      }
+    }
+  
     function dragStart(e, task, from) {
       e.dataTransfer.setData("text/plain", JSON.stringify({ task, from }));
     }
@@ -19,11 +43,11 @@
       const data = JSON.parse(e.dataTransfer.getData("text/plain"));
       const { task, from } = data;
   
-      // aus alter Lane entfernen
       lanes[from].tasks = lanes[from].tasks.filter((t) => t.id !== task.id);
-  
-      // in neue Lane hinzufügen
       lanes[toIndex].tasks.push(task);
+  
+      // Speichern nach jeder Änderung
+      save();
     }
   </script>
   
@@ -36,4 +60,5 @@
       {/each}
     </section>
   </main>
+  
   
