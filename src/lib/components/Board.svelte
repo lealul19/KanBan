@@ -10,6 +10,21 @@
       { title: "Review", color: "bg-green-200", tasks: [] },
       { title: "Done", color: "bg-blue-200", tasks: [] }
     ];
+  
+    function dragStart(e, task, from) {
+      e.dataTransfer.setData("text/plain", JSON.stringify({ task, from }));
+    }
+  
+    function drop(e, toIndex) {
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+      const { task, from } = data;
+  
+      // aus alter Lane entfernen
+      lanes[from].tasks = lanes[from].tasks.filter((t) => t.id !== task.id);
+  
+      // in neue Lane hinzufügen
+      lanes[toIndex].tasks.push(task);
+    }
   </script>
   
   <main class="p-6 bg-sky-800 min-h-screen text-gray-800">
@@ -17,7 +32,7 @@
   
     <section class="grid grid-cols-4 gap-4">
       {#each lanes as lane, i}
-        <Lane {lane} />
+        <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart} />
       {/each}
     </section>
   </main>
