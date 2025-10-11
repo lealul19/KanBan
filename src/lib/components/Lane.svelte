@@ -2,10 +2,10 @@
   import TaskCard from "./TaskCard.svelte";
   export let lane;
   export let laneIndex;
-  export let onDrop;
-  export let onDragStart;
+  export let onDrop = () => {};
+  export let onDragStart = () => {};
 
-  // Summe der Story Points berechnen
+  // Summe der Story Points
   $: totalPoints = lane.tasks.reduce(
     (sum, t) => sum + (parseInt(t.points) || 0),
     0
@@ -18,8 +18,6 @@
   on:drop={(e) => onDrop(e, laneIndex)}
 >
   <h2 class="text-lg font-semibold text-center mb-2">{lane.title}</h2>
-
-  <!-- Anzeige der Story Points -->
   <p class="text-sm text-center mb-3 text-gray-700">
     Total Points: <span class="font-bold">{totalPoints}</span>
   </p>
@@ -32,3 +30,4 @@
     {/each}
   {/if}
 </div>
+

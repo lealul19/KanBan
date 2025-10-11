@@ -1,7 +1,8 @@
 <script>
   export let task;
+  export let laneIndex;
+  export let onDragStart = () => {};
 
-  // prüft, ob Task überfällig ist
   const today = new Date();
   let isOverdue = false;
 
@@ -13,9 +14,10 @@
 
 <article
   draggable="true"
-  class="p-2 mb-2 rounded shadow cursor-grab hover:bg-gray-50 transition 
-    bg-white border-l-4 
-    {isOverdue ? 'border-red-500 bg-red-50' : 'border-gray-200'}"
+  on:dragstart={(e) => onDragStart(e, task, laneIndex)}
+  class="p-2 mb-2 rounded shadow cursor-grab transition 
+  bg-white border-l-4 
+  {isOverdue ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:bg-gray-50'}"
 >
   <h3 class="font-semibold">{task.title}</h3>
   <p class="text-sm text-gray-700">{task.desc}</p>

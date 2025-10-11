@@ -14,31 +14,32 @@
   let newTask = { title: "", desc: "", due: "", points: "", priority: "" };
   let isBrowser = false;
 
+  // beim Start: LocalStorage lesen + Notification-Rechte holen
   onMount(() => {
     isBrowser = true;
 
-    // Lade gespeicherte Daten
     const saved = localStorage.getItem("kanbanData");
     if (saved) {
       try {
         lanes = JSON.parse(saved);
       } catch {
-        console.warn("Error loading data");
+        console.warn("Error while loading data");
       }
     }
 
-    // Erlaubnis für Notifications anfragen
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
   });
 
+  // speichert alle Lanes im localStorage
   function save() {
     if (isBrowser) {
       localStorage.setItem("kanbanData", JSON.stringify(lanes));
     }
   }
 
+  // neue Task hinzufügen → direkt im Backlog
   function addTask() {
     if (!newTask.title.trim()) return alert("Title required!");
 
@@ -49,10 +50,12 @@
     };
 
     lanes[0].tasks.push(task);
-    newTask = { title: "", desc: "", due: "", points: "", priority: "" };
-    showDialog = false;
     save();
 
+    newTask = { title: "", desc: "", due: "", points: "", priority: "" };
+    showDialog = false;
+
+    // automatisch scrollen, damit neue Task sichtbar ist
     setTimeout(() => {
       const backlogCol = document.querySelector(".lane-backlog");
       if (backlogCol)
@@ -60,9 +63,10 @@
     }, 100);
   }
 
-  // ✨ Drag & Drop mit Notification ✨
+  // 🔹 Drag & Drop Funktionen
   function dragStart(e, task, from) {
-    e.dataTransfer.setData("text/plain", JSON.stringify({ task, from }));
+    const data = { task, from };
+    e.dataTransfer.setData("text/plain", JSON.stringify(data));
   }
 
   function drop(e, toIndex) {
@@ -73,7 +77,7 @@
     lanes[toIndex].tasks.push(task);
     save();
 
-    // ✅ Notification bei Done
+    // ✅ Notification bei "Done"
     if (lanes[toIndex].title === "Done" && "Notification" in window) {
       if (Notification.permission === "granted") {
         new Notification("✅ Task Done", { body: task.title });
@@ -91,6 +95,7 @@
 <main class="p-6 bg-sky-800 min-h-screen text-gray-800">
   <h1 class="text-white text-3xl font-bold mb-6 text-center">Kanban Board</h1>
 
+  <!-- Button für neue Task -->
   <div class="flex justify-center mb-4">
     <button
       on:click={() => (showDialog = true)}
@@ -100,12 +105,14 @@
     </button>
   </div>
 
+  <!-- 4 Spalten -->
   <section class="grid grid-cols-4 gap-4">
     {#each lanes as lane, i}
       <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart} />
     {/each}
   </section>
 
+  <!-- Dialog -->
   <TaskDialog
     {showDialog}
     {newTask}
