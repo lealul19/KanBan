@@ -11,7 +11,6 @@
   ];
 
   let showDialog = false;
-  // 🔹 Story Points wieder als Feld
   let newTask = { title: "", desc: "", due: "", points: "", priority: "" };
   let isBrowser = false;
 
@@ -19,45 +18,25 @@
     isBrowser = true;
     const saved = localStorage.getItem("kanbanData");
     if (saved) {
-      try {
-        lanes = JSON.parse(saved);
-      } catch {
-        console.warn("Error loading data");
-      }
+      try { lanes = JSON.parse(saved); } 
+      catch { console.warn("Error loading data"); }
     }
-
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
   });
 
   function save() {
-    if (isBrowser) {
-      localStorage.setItem("kanbanData", JSON.stringify(lanes));
-    }
+    if (isBrowser) localStorage.setItem("kanbanData", JSON.stringify(lanes));
   }
 
   function addTask() {
     if (!newTask.title.trim()) return alert("Title required!");
-
-    const task = {
-      ...newTask,
-      id: Date.now(),
-      created: new Date().toISOString()
-    };
-
+    const task = { ...newTask, id: Date.now(), created: new Date().toISOString() };
     lanes[0].tasks.push(task);
     save();
-
-    // Felder zurücksetzen
     newTask = { title: "", desc: "", due: "", points: "", priority: "" };
     showDialog = false;
-
-    setTimeout(() => {
-      const backlogCol = document.querySelector(".lane-backlog");
-      if (backlogCol)
-        backlogCol.scrollTo({ top: backlogCol.scrollHeight, behavior: "smooth" });
-    }, 100);
   }
 
   function dragStart(e, task, from) {
@@ -68,7 +47,6 @@
   function drop(e, toIndex) {
     const data = JSON.parse(e.dataTransfer.getData("text/plain"));
     const { task, from } = data;
-
     lanes[from].tasks = lanes[from].tasks.filter((t) => t.id !== task.id);
     lanes[toIndex].tasks.push(task);
     save();
@@ -82,8 +60,31 @@
     }
   }
 
-  function closeDialog() {
-    showDialog = false;
+  function closeDialog() { showDialog = false; }
+
+  // 🧩 CSV-Export Funktion
+  function exportCSV() {
+    const rows = [["Title","Description","Due","Points","Priority","Lane"]];
+    lanes.forEach(lane => {
+      lane.tasks.forEach(task => {
+        rows.push([
+          task.title,
+          task.desc || "",
+          task.due || "",
+          task.points || "",
+          task.priority || "",
+          lane.title
+        ]);
+      });
+    });
+
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "kanban_tasks.csv";
+    link.click();
   }
 </script>
 
@@ -97,18 +98,21 @@
     >
       ➕ New Task
     </button>
+
+    <!-- CSV-Export Button -->
+    <button
+      on:click={exportCSV}
+      class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
+    >
+      ⬇️ Export CSV
+    </button>
   </div>
 
   <section class="grid grid-cols-4 gap-4">
     {#each lanes as lane, i}
-      <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart} />
+      <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart}/>
     {/each}
   </section>
 
-  <TaskDialog
-    {showDialog}
-    {newTask}
-    {addTask}
-    {closeDialog}
-  />
+  <TaskDialog {showDialog} {newTask} {addTask} {closeDialog}/>
 </main>
