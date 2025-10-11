@@ -27,10 +27,14 @@
         placeholder="Description"
         bind:value={newTask.desc}
       ></textarea>
+      <input type="date" class="w-full border p-1 mb-2" bind:value={newTask.due} />
+      <!-- 🔹 Neues Feld für Story Points -->
       <input
-        type="date"
+        type="number"
         class="w-full border p-1 mb-2"
-        bind:value={newTask.due}
+        placeholder="Story Points"
+        min="0"
+        bind:value={newTask.points}
       />
       <select class="w-full border p-1 mb-2" bind:value={newTask.priority}>
         <option value="">Priority</option>

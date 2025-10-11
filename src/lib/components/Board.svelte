@@ -11,13 +11,12 @@
   ];
 
   let showDialog = false;
-  let newTask = { title: "", desc: "", due: "", priority: "" };
+  // 🔹 Story Points wieder als Feld
+  let newTask = { title: "", desc: "", due: "", points: "", priority: "" };
   let isBrowser = false;
 
-  // Daten laden + Notification-Berechtigung
   onMount(() => {
     isBrowser = true;
-
     const saved = localStorage.getItem("kanbanData");
     if (saved) {
       try {
@@ -32,14 +31,12 @@
     }
   });
 
-  // speichert alles im localStorage
   function save() {
     if (isBrowser) {
       localStorage.setItem("kanbanData", JSON.stringify(lanes));
     }
   }
 
-  // Neue Task hinzufügen (immer ins Backlog)
   function addTask() {
     if (!newTask.title.trim()) return alert("Title required!");
 
@@ -52,10 +49,10 @@
     lanes[0].tasks.push(task);
     save();
 
-    newTask = { title: "", desc: "", due: "", priority: "" };
+    // Felder zurücksetzen
+    newTask = { title: "", desc: "", due: "", points: "", priority: "" };
     showDialog = false;
 
-    // Automatisch scrollen, um die neue Task zu sehen
     setTimeout(() => {
       const backlogCol = document.querySelector(".lane-backlog");
       if (backlogCol)
@@ -63,7 +60,6 @@
     }, 100);
   }
 
-  // Drag & Drop
   function dragStart(e, task, from) {
     const data = { task, from };
     e.dataTransfer.setData("text/plain", JSON.stringify(data));
@@ -77,7 +73,6 @@
     lanes[toIndex].tasks.push(task);
     save();
 
-    // ✅ Notification bei "Done"
     if (lanes[toIndex].title === "Done" && "Notification" in window) {
       if (Notification.permission === "granted") {
         new Notification("✅ Task Done", { body: task.title });
@@ -95,8 +90,7 @@
 <main class="p-6 bg-sky-800 min-h-screen text-gray-800">
   <h1 class="text-white text-3xl font-bold mb-6 text-center">Kanban Board</h1>
 
-  <!-- Button -->
-  <div class="flex justify-center mb-4">
+  <div class="flex justify-center mb-4 space-x-3">
     <button
       on:click={() => (showDialog = true)}
       class="bg-white text-sky-700 px-4 py-2 rounded shadow hover:bg-sky-100"
@@ -105,14 +99,12 @@
     </button>
   </div>
 
-  <!-- Board -->
   <section class="grid grid-cols-4 gap-4">
     {#each lanes as lane, i}
       <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart} />
     {/each}
   </section>
 
-  <!-- Dialog -->
   <TaskDialog
     {showDialog}
     {newTask}
