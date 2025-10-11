@@ -21,6 +21,7 @@
       try { lanes = JSON.parse(saved); } 
       catch { console.warn("Error loading data"); }
     }
+
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
@@ -53,7 +54,7 @@
 
     if (lanes[toIndex].title === "Done" && "Notification" in window) {
       if (Notification.permission === "granted") {
-        new Notification("✅ Task Done", { body: task.title });
+        new Notification("Task Done", { body: task.title });
       } else {
         Notification.requestPermission();
       }
@@ -62,7 +63,6 @@
 
   function closeDialog() { showDialog = false; }
 
-  // 🧩 CSV-Export Funktion
   function exportCSV() {
     const rows = [["Title","Description","Due","Points","Priority","Lane"]];
     lanes.forEach(lane => {
@@ -96,23 +96,22 @@
       on:click={() => (showDialog = true)}
       class="bg-white text-sky-700 px-4 py-2 rounded shadow hover:bg-sky-100"
     >
-      ➕ New Task
+      New Task
     </button>
 
-    <!-- CSV-Export Button -->
     <button
       on:click={exportCSV}
       class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
     >
-      ⬇️ Export CSV
+      Export CSV
     </button>
   </div>
 
   <section class="grid grid-cols-4 gap-4">
     {#each lanes as lane, i}
-      <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart}/>
+      <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart} />
     {/each}
   </section>
 
-  <TaskDialog {showDialog} {newTask} {addTask} {closeDialog}/>
+  <TaskDialog {showDialog} {newTask} {addTask} {closeDialog} />
 </main>
