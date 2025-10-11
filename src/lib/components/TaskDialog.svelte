@@ -32,12 +32,6 @@
         class="w-full border p-1 mb-2"
         bind:value={newTask.due}
       />
-      <input
-        type="number"
-        class="w-full border p-1 mb-2"
-        placeholder="Story Points"
-        bind:value={newTask.points}
-      />
       <select class="w-full border p-1 mb-2" bind:value={newTask.priority}>
         <option value="">Priority</option>
         <option>Low</option>

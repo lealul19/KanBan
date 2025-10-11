@@ -26,9 +26,6 @@
       Due: {task.due} {isOverdue ? '⚠️' : ''}
     </p>
   {/if}
-  {#if task.points}
-    <p class="text-xs text-gray-500">Points: {task.points}</p>
-  {/if}
   {#if task.priority}
     <p class="text-xs text-gray-500">Priority: {task.priority}</p>
   {/if}
