@@ -9,6 +9,43 @@
     const dueDate = new Date(task.due);
     isOverdue = today > dueDate;
   }
+
+  // ICS-Export
+  function exportICS() {
+    if (!task.due) {
+      alert("This task has no due date.");
+      return;
+    }
+
+    const start = new Date(task.due);
+    const end = new Date(start.getTime() + 60 * 60 * 1000); // +1 Stunde
+
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//KanbanBoard//EN",
+      "BEGIN:VEVENT",
+      `UID:${task.id}@kanbanboard`,
+      `DTSTAMP:${formatDate(new Date())}`,
+      `DTSTART:${formatDate(start)}`,
+      `DTEND:${formatDate(end)}`,
+      `SUMMARY:${task.title}`,
+      `DESCRIPTION:${task.desc || ""}`,
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\r\n");
+
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${task.title.replace(/\s+/g, "_")}.ics`;
+    link.click();
+  }
+
+  function formatDate(date) {
+    return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  }
 </script>
 
 <article
@@ -20,9 +57,10 @@
 >
   <h3 class="font-semibold">{task.title}</h3>
   <p class="text-sm text-gray-700">{task.desc}</p>
+
   {#if task.due}
     <p class="text-xs text-gray-500">
-      Due: {task.due} {isOverdue ? '⚠️' : ''}
+      Due: {task.due} {isOverdue ? "⚠️" : ""}
     </p>
   {/if}
   {#if task.points}
@@ -31,5 +69,15 @@
   {#if task.priority}
     <p class="text-xs text-gray-500">Priority: {task.priority}</p>
   {/if}
+
+  <div class="text-right mt-2">
+    <button
+      on:click={exportICS}
+      class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+    >
+      Add to Calendar
+    </button>
+  </div>
 </article>
+
 
