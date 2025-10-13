@@ -13,6 +13,7 @@
   let showDialog = false;
   let newTask = { title: "", desc: "", due: "", points: "", priority: "" };
   let isBrowser = false;
+  let userCountry = "Detecting location...";
 
   onMount(() => {
     isBrowser = true;
@@ -25,6 +26,8 @@
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
+
+    detectLocation();
   });
 
   function save() {
@@ -86,9 +89,33 @@
     link.download = "kanban_tasks.csv";
     link.click();
   }
+
+  // Geolocation + Reverse Geocoding
+  async function detectLocation() {
+    if (!navigator.geolocation) {
+      userCountry = "Geolocation not supported.";
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      try {
+        const response = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        );
+        const data = await response.json();
+        userCountry = data.countryName || "Unknown location";
+      } catch (error) {
+        userCountry = "Location unavailable";
+      }
+    }, 
+    () => {
+      userCountry = "Location unavailable";
+    });
+  }
 </script>
 
-<main class="p-6 bg-sky-800 min-h-screen text-gray-800">
+<main class="p-6 bg-sky-800 min-h-screen text-gray-800 flex flex-col">
   <h1 class="text-white text-3xl font-bold mb-6 text-center">Kanban Board</h1>
 
   <div class="flex justify-center mb-4 space-x-3">
@@ -107,11 +134,15 @@
     </button>
   </div>
 
-  <section class="grid grid-cols-4 gap-4">
+  <section class="grid grid-cols-4 gap-4 flex-grow">
     {#each lanes as lane, i}
       <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart} />
     {/each}
   </section>
 
   <TaskDialog {showDialog} {newTask} {addTask} {closeDialog} />
+
+  <footer class="text-center text-white mt-6 text-sm">
+    Location: {userCountry}
+  </footer>
 </main>
