@@ -10,7 +10,6 @@
     isOverdue = today > dueDate;
   }
 
-  // ICS-Export
   function exportICS() {
     if (!task.due) {
       alert("This task has no due date.");
@@ -18,7 +17,7 @@
     }
 
     const start = new Date(task.due);
-    const end = new Date(start.getTime() + 60 * 60 * 1000); // +1 Stunde
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
 
     const icsContent = [
       "BEGIN:VCALENDAR",
@@ -46,6 +45,22 @@
   function formatDate(date) {
     return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
   }
+
+  function shareTask() {
+    const shareData = {
+      title: task.title,
+      text: `${task.title}\n${task.desc || ""}\nDue: ${task.due || "no date"}`,
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {
+        console.log("Share canceled or failed");
+      });
+    } else {
+      alert("Sharing not supported in this browser.");
+    }
+  }
 </script>
 
 <article
@@ -70,14 +85,19 @@
     <p class="text-xs text-gray-500">Priority: {task.priority}</p>
   {/if}
 
-  <div class="text-right mt-2">
+  <div class="flex justify-between mt-2">
     <button
       on:click={exportICS}
       class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
     >
       Add to Calendar
     </button>
+
+    <button
+      on:click={shareTask}
+      class="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+    >
+      Share
+    </button>
   </div>
 </article>
-
-
