@@ -13,11 +13,13 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-  class="lane-{lane.title.toLowerCase()} rounded-lg p-3 {lane.color} min-h-[400px] max-h-[80vh] overflow-y-auto"
+  class="rounded-lg p-3 {lane.color} min-h-[400px] max-h-[80vh] overflow-y-auto"
   on:dragover|preventDefault
   on:drop={(e) => onDrop(e, laneIndex)}
 >
-  <h2 class="text-lg font-semibold text-center mb-2">{lane.title}</h2>
+  <!-- Titel jetzt schwarz -->
+  <h2 class="text-lg font-bold text-center mb-2 text-black">{lane.title}</h2>
+
   <p class="text-sm text-center mb-3 text-gray-700">
     Total Points: <span class="font-bold">{totalPoints}</span>
   </p>
