@@ -11,6 +11,7 @@
   );
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   class="lane-{lane.title.toLowerCase()} rounded-lg p-3 {lane.color} min-h-[400px] max-h-[80vh] overflow-y-auto"
   on:dragover|preventDefault
