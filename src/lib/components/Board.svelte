@@ -3,7 +3,7 @@
   import TaskDialog from "./TaskDialog.svelte";
   import { onMount } from "svelte";
 
-  // Feste Lanes mit deinen Namen
+  // Vier Spalten mit Farben
   let lanes = [
     { title: "To Do", color: "bg-red-200", tasks: [] },
     { title: "Doing", color: "bg-yellow-200", tasks: [] },
@@ -16,17 +16,18 @@
   let isBrowser = false;
   let userCountry = "Detecting location...";
 
+  // Lädt gespeicherte Daten und Location
   onMount(() => {
     isBrowser = true;
-
-    // Lade gespeicherte Daten
     const saved = localStorage.getItem("kanbanData");
     if (saved) {
-      try { lanes = normalize(JSON.parse(saved)); } 
-      catch { console.warn("Error loading data"); }
+      try {
+        lanes = JSON.parse(saved);
+      } catch {
+        console.warn("Error loading data");
+      }
     }
 
-    // Erlaubnis für Notifications
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
@@ -34,67 +35,46 @@
     detectLocation();
   });
 
-  // Korrigiere alte Titel (Backlog → To Do, Review → Done)
-  function normalize(savedLanes) {
-    const map = new Map([
-      ["Backlog", "To Do"],
-      ["Doing", "Doing"],
-      ["Review", "Done"],
-      ["Done", "Done"],
-      ["Archive", "Archive"],
-      ["To Do", "To Do"]
-    ]);
-
-    const bucket = { "To Do": [], "Doing": [], "Done": [], "Archive": [] };
-
-    for (const lane of savedLanes || []) {
-      const newTitle = map.get(lane.title) || "To Do";
-      bucket[newTitle].push(...(lane.tasks || []));
-    }
-
-    const ordered = [
-      { title: "To Do", color: "bg-red-200", tasks: bucket["To Do"] },
-      { title: "Doing", color: "bg-yellow-200", tasks: bucket["Doing"] },
-      { title: "Done", color: "bg-green-200", tasks: bucket["Done"] },
-      { title: "Archive", color: "bg-blue-200", tasks: bucket["Archive"] }
-    ];
-
-    localStorage.setItem("kanbanData", JSON.stringify(ordered));
-    return ordered;
-  }
-
+  // Speichert in localStorage
   function save() {
     if (isBrowser) localStorage.setItem("kanbanData", JSON.stringify(lanes));
   }
 
-  // Neue Task landet in "To Do"
+  // ✅ Neue Task automatisch in "To Do" anzeigen (reaktiv)
   function addTask() {
     if (!newTask.title.trim()) return alert("Title required!");
-    const task = { ...newTask, id: Date.now(), created: new Date().toISOString() };
-    lanes[0].tasks.push(task);
+
+    const task = { 
+      ...newTask, 
+      id: Date.now(), 
+      created: new Date().toISOString() 
+    };
+
+    // ⚡ Statt push → neues Array für sofortige Reaktivität
+    lanes[0].tasks = [...lanes[0].tasks, task];
+
     save();
     newTask = { title: "", desc: "", due: "", points: "", priority: "" };
     showDialog = false;
   }
 
-  // Drag & Drop
+  // Drag starten
   function dragStart(e, task, from) {
     const data = { task, from };
     e.dataTransfer.setData("text/plain", JSON.stringify(data));
   }
 
+  // Task fallen lassen (Drop)
   function drop(e, toIndex) {
     const data = JSON.parse(e.dataTransfer.getData("text/plain"));
     const { task, from } = data;
 
-    // Entferne aus alter Lane
     lanes[from].tasks = lanes[from].tasks.filter((t) => t.id !== task.id);
+    lanes[toIndex].tasks = [...lanes[toIndex].tasks, task]; // Reaktiv auch hier
 
-    // In neue Lane hinzufügen
-    lanes[toIndex].tasks.push(task);
     save();
 
-    // Wenn in Done -> Notification
+    // Notification, wenn in Done verschoben
     if (lanes[toIndex].title === "Done" && "Notification" in window) {
       if (Notification.permission === "granted") {
         new Notification("Task Done", { body: task.title });
@@ -102,9 +82,11 @@
     }
   }
 
-  function closeDialog() { showDialog = false; }
+  function closeDialog() {
+    showDialog = false;
+  }
 
-  // CSV-Export
+  // Exportiert alle Tasks als CSV-Datei
   function exportCSV() {
     const rows = [["Title","Description","Due","Points","Priority","Lane"]];
     lanes.forEach(lane => {
@@ -119,7 +101,6 @@
         ]);
       });
     });
-
     const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -129,7 +110,7 @@
     link.click();
   }
 
-  // GeoAPI
+  // GEO-Standort ermitteln
   async function detectLocation() {
     if (!navigator.geolocation) {
       userCountry = "Geolocation not supported.";
@@ -173,14 +154,17 @@
     </button>
   </div>
 
+  <!-- Alle Lanes -->
   <section class="grid grid-cols-4 gap-4 flex-grow">
     {#each lanes as lane, i}
       <Lane {lane} laneIndex={i} onDrop={drop} onDragStart={dragStart} />
     {/each}
   </section>
 
+  <!-- Dialog zum Hinzufügen -->
   <TaskDialog {showDialog} {newTask} {addTask} {closeDialog} />
 
+  <!-- Footer -->
   <footer class="text-center text-gray-300 mt-6 text-sm border-t border-gray-600 pt-3">
     Location: {userCountry}  
     • Lea Lulaj – HTL Shkodër 2025
