@@ -1,22 +1,41 @@
 {
-    "name": "Kanban Board",
-    "short_name": "Kanban",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#0369a1",
-    "theme_color": "#0369a1",
-    "description": "Ein modernes Kanban Board mit Svelte.",
-    "icons": [
-      {
-        "src": "/icons/icon-192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "/icons/icon-512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ]
-  }
+  "name": "Kanban Board - Task Management",
+  "short_name": "Kanban",
+  "description": "A modern Kanban board for efficient task management with drag & drop, PWA support, and export features",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0369a1",
+  "theme_color": "#0369a1",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "shortcuts": [
+    {
+      "name": "Create New Task",
+      "short_name": "New Task",
+      "description": "Create a new task quickly",
+      "url": "/?action=new",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
   

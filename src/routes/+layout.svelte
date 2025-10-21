@@ -16,6 +16,9 @@
 </script>
 
 <svelte:head>
+	<title>Kanban Board - Task Management</title>
+	<meta name="description" content="Modern Kanban board for efficient task management with drag & drop, PWA support, and export features" />
+	<meta name="theme-color" content="#0369a1" />
 	<link rel="icon" href={favicon} />
 	<link rel="manifest" href="/manifest.json" />
 </svelte:head>
